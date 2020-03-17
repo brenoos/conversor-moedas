@@ -35,8 +35,42 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final realController = TextEditingController();
+  final dolarController = TextEditingController();
+  final euroController = TextEditingController();
+  final bitcoinController = TextEditingController();
+
   double dolar;
   double euro;
+  double bitcoin;
+
+  void _realChanged(String text) {
+    double real = double.parse(text);
+    dolarController.text = (real / dolar).toStringAsFixed(2);
+    euroController.text = (real / euro).toStringAsFixed(2);
+    bitcoinController.text = (real / bitcoin).toStringAsFixed(8);
+  }
+
+  void _dolarChanged(String text) {
+    double dolar = double.parse(text);
+    realController.text = (dolar * this.dolar).toStringAsFixed(2);
+    euroController.text = (dolar * this.dolar / euro).toStringAsFixed(2);
+    bitcoinController.text = (dolar * this.dolar / bitcoin).toStringAsFixed(8);
+  }
+
+  void _euroChanged(String text) {
+    double euro = double.parse(text);
+    realController.text = (euro * this.euro).toStringAsFixed(2);
+    dolarController.text = (euro * this.euro / dolar).toStringAsFixed(2);
+    bitcoinController.text = (euro * this.euro / bitcoin).toStringAsFixed(8);
+  }
+
+  void _bitcoinChanged(String text) {
+    double bitcoin = double.parse(text);
+    realController.text = (bitcoin * this.bitcoin).toStringAsFixed(2);
+    dolarController.text = (bitcoin * this.bitcoin / dolar).toStringAsFixed(2);
+    euroController.text = (bitcoin * this.bitcoin / euro).toStringAsFixed(2);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +112,7 @@ class _HomeState extends State<Home> {
               } else {
                 dolar = snapshot.data["results"]["currencies"]["USD"]["buy"];
                 euro = snapshot.data["results"]["currencies"]["EUR"]["buy"];
+                bitcoin = snapshot.data["results"]["currencies"]["BTC"]["buy"];
                 return SingleChildScrollView(
                   padding: EdgeInsets.all(10),
                   child: Column(
@@ -89,45 +124,17 @@ class _HomeState extends State<Home> {
                         color: Colors.amber,
                       ),
                       Divider(),
-                      TextField(
-                        decoration: InputDecoration(
-                          labelText: "Reais",
-                          labelStyle: TextStyle(color: Colors.amber),
-                          border: OutlineInputBorder(),
-                          prefixText: "R\$ ",
-                        ),
-                        style: TextStyle(color: Colors.amber, fontSize: 25),
-                      ),
+                      buildTextField(
+                          "Reais", "R\$ ", realController, _realChanged),
                       Divider(),
-                      TextField(
-                        decoration: InputDecoration(
-                          labelText: "Dólares",
-                          labelStyle: TextStyle(color: Colors.amber),
-                          border: OutlineInputBorder(),
-                          prefixText: "US\$ ",
-                        ),
-                        style: TextStyle(color: Colors.amber, fontSize: 25),
-                      ),
+                      buildTextField(
+                          "Dólares", "US\$ ", dolarController, _dolarChanged),
                       Divider(),
-                      TextField(
-                        decoration: InputDecoration(
-                          labelText: "Euros",
-                          labelStyle: TextStyle(color: Colors.amber),
-                          border: OutlineInputBorder(),
-                          prefixText: "€\$ ",
-                        ),
-                        style: TextStyle(color: Colors.amber, fontSize: 25),
-                      ),
+                      buildTextField(
+                          "Euros", "€\$ ", euroController, _euroChanged),
                       Divider(),
-                      TextField(
-                        decoration: InputDecoration(
-                          labelText: "Bitcoin",
-                          labelStyle: TextStyle(color: Colors.amber),
-                          border: OutlineInputBorder(),
-                          prefixText: "BTC\$ ",
-                        ),
-                        style: TextStyle(color: Colors.amber, fontSize: 25),
-                      ),
+                      buildTextField("Bitcoin", "BTC\$ ", bitcoinController,
+                          _bitcoinChanged),
                     ],
                   ),
                 );
@@ -137,4 +144,20 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+}
+
+Widget buildTextField(String label, String prefix,
+    TextEditingController controller, Function handleChange) {
+  return TextField(
+    controller: controller,
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.amber),
+      border: OutlineInputBorder(),
+      prefixText: prefix,
+    ),
+    style: TextStyle(color: Colors.amber, fontSize: 25),
+    onChanged: handleChange,
+    keyboardType: TextInputType.number,
+  );
 }
